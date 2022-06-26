@@ -46,6 +46,9 @@ class FourView(APIView):
         return Response(data)
 
 
+# додатковий приклад
+
+
 users = [
     {'id': 1, 'name': 'Max1', 'age': 12},
     {'id': 2, 'name': 'Max2', 'age': 22},
