@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -6,14 +7,31 @@ from .models import CarModel
 from .serializers import CarSerializer
 
 
-# Create
-# Read
-# Update
-# Delete
-
 class CarListCreateView(APIView):
     def get(self, *args, **kwargs):
         qs = CarModel.objects.all()
+
+        # формує строку запиту на всі карси з таблиці, які можна відфільтрувати перед власне самим виконанням запиту,
+        # тобто передаванням в серіалайзер
+        # qs = qs.filter(brand__in=('BMW', 'audi'))
+        # qs = qs.filter(brand__contains=('DI'))
+        # якщо потрібно ігнорити регістр
+        # qs = qs.filter(brand__icontains=('di'))
+
+        # аналогічно для числових
+        # qs = qs.filter(price__gt=2000)
+        # qs = qs.filter(price__range=(2000, 10000))
+        # qs = qs.filter(price__in=(6500, 10000))
+        # можна через Q записувати вирази
+        # qs = qs.filter(Q(price__in=(6500, 10000)) | Q(brand__contains=('DI')))
+
+        # а також можна переда один елемент, але тоді забрати many з серіалайзера
+        # qs = qs.filter(price__gt=1000).last()
+        # serializer = CarSerializer(instance=qs)
+
+        qs = qs.filter(price__gt=1000)
+        print(qs.count())
+
         serializer = CarSerializer(instance=qs, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -62,7 +80,7 @@ class CarUpdateRetrieveDestroyView(APIView):
         serializer.is_valid(raise_exception=True)
         # зберігаємось в базу,(якщо не зробили перевірку, він не запише в базу)
         serializer.save()
-        return Response(serializer.data,status.HTTP_200_OK)
+        return Response(serializer.data, status.HTTP_200_OK)
 
     def patch(self, *args, **kwargs):
         # майже все як put
