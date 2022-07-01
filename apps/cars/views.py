@@ -46,8 +46,33 @@ class CarUpdateRetrieveDestroyView(APIView):
         if not CarModel.objects.filter(pk=pk).exists():
             return Response('Car is not found')
 
+        # витягуємо з бази даних car
         car = CarModel.objects.get(pk=pk)
+        # передаємо цей кар і те що прислав клієнт
         serializer = CarSerializer(car, data)
 
+        # перевіряємо на валідність і пеовертаємо помилку якщо не валідне
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors)
 
+        # або є скорочений варіант запису цього
+        serializer.is_valid(raise_exception=True)
+        # зберігаємось в базу,(якщо не зробили перевірку, він не запише в базу)
+        serializer.save()
         return Response(serializer.data)
+
+    def patch(self, *args, **kwargs):
+        data = self.request.data
+        pk = kwargs.get('pk')
+
+        if not CarModel.objects.filter(pk=pk).exists():
+            return Response('Car is not found')
+
+        car = CarModel.objects.get(pk=pk)
+        # додаємо partial=True щоб не було помилки при довільній кількості полів
+        serializer = CarSerializer(car, data, partial=True)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
