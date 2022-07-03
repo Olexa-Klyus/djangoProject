@@ -1,6 +1,8 @@
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, \
     DestroyModelMixin
 
@@ -222,8 +224,45 @@ from .serializers import CarSerializer
 
 #
 #
-# запис через Mixing
-class CarListCreateView(GenericAPIView, CreateModelMixin, ListModelMixin):
+# # запис через Mixing
+# class CarListCreateView(GenericAPIView, CreateModelMixin, ListModelMixin):
+#     queryset = CarModel.objects.all()
+#     serializer_class = CarSerializer
+#
+#     # a фільтр реалізуємо через додатковий метод, який змінює реквест
+#     def get_queryset(self):
+#         price_gt = self.request.query_params.get('price_gt')
+#         if price_gt:
+#             self.queryset.filter(price__gt=price_gt)
+#         return super().get_queryset()
+#
+#     def get(self, *args, **kwargs):
+#         return super().list(self.request, *args, **kwargs)
+#
+#     def post(self, *args, **kwargs):
+#         return super().create(self.request, *args, **kwargs)
+#
+#
+# class CarUpdateRetrieveDestroyView(GenericAPIView, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin):
+#     queryset = CarModel.objects.all()
+#     serializer_class = CarSerializer
+#
+#     def get(self, *args, **kwargs):
+#         return super().retrieve(self.request, *args, **kwargs)
+#
+#     def put(self, *args, **kwargs):
+#         return super().update(self.request, *args, **kwargs)
+#
+#     def patch(self, *args, **kwargs):
+#         return super().partial_update(self.request, *args, **kwargs)
+#
+#     def delete(self, *args, **kwargs):
+#         return super().destroy(self.request, *args, **kwargs)
+#
+#
+
+# запис через об'єднані з GenericAPIView класи дуже компактно
+class CarListCreateView(ListCreateAPIView):
     queryset = CarModel.objects.all()
     serializer_class = CarSerializer
 
@@ -234,25 +273,7 @@ class CarListCreateView(GenericAPIView, CreateModelMixin, ListModelMixin):
             self.queryset.filter(price__gt=price_gt)
         return super().get_queryset()
 
-    def get(self, *args, **kwargs):
-        return super().list(self.request, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
-        return super().create(self.request, *args, **kwargs)
-
-
-class CarUpdateRetrieveDestroyView(GenericAPIView, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin):
+class CarUpdateRetrieveDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = CarModel.objects.all()
     serializer_class = CarSerializer
-
-    def get(self, *args, **kwargs):
-        return super().retrieve(self.request, *args, **kwargs)
-
-    def put(self, *args, **kwargs):
-        return super().update(self.request, *args, **kwargs)
-
-    def patch(self, *args, **kwargs):
-        return super().partial_update(self.request, *args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        return super().destroy(self.request, *args, **kwargs)
